@@ -1,0 +1,66 @@
+---
+title: "ESM 244 Lab Week 2"
+author: "Satie Airame"
+date: "1/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(palmerpenguins)
+library(here)
+
+## For PCA
+library(ggfortify)
+
+## For ggplot customization:
+library(readxl) # read excel files
+library(gghighlight) # highlight series or groups we specify based on values or strings
+library(lubridate)
+library(plotly)
+
+# To make compound figures:
+library(patchwork)
+```
+
+## Part 1: PCA with penguins
+
+```{r}
+penguin_pca <- penguins %>% 
+  select(body_mass_g, ends_with("_mm")) %>% # To select several columns that all end with a particular string, e.g., _mm
+  drop_na() %>% # To remove NA
+  scale() %>% # To take the data and put in all on similar scales
+  prcomp() # To create a PCA outcome
+
+penguin_pca$rotation # Bring up loadings for each of the PCA, what are the loadings for the variable, e.g., rotation
+
+# Type ?scale and ?autoplot in the Console to learn more about these functions
+
+# Make a new dataset with the observations that exist, match the observations that were used to create this PCA biplot but still contain the other variables.
+
+penguin_complete <- penguins %>% 
+  drop_na(body_mass_g, ends_with("_mm")) # make new dataset from penguins that has the exact same observations used in the PCA but also has the other variables
+
+autoplot(penguin_pca,
+         data = penguin_complete,
+         colour = "species", # use other dataset for the aesthetics 
+         loadings = TRUE, # add loadings (arrows)
+         loadings.label = TRUE) + # add labels for the loadings, can customize the location of labels so they don't overlap
+  theme_minimal()
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
