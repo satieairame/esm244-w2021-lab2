@@ -50,15 +50,58 @@ autoplot(penguin_pca,
          loadings.label = TRUE) + # add labels for the loadings, can customize the location of labels so they don't overlap
   theme_minimal()
 
+```
+
+### Part 2: ggplot customization & reading in different file types
+
+#### Read in an .xlsx file & do some wrangling
+
+```{r}
+fish_noaa <- read_excel(here("data", "foss_landings.xlsx")) %>% 
+  clean_names() %>% # default to convert titles to lower snake case
+  mutate(across(where(is.character), tolower)) %>% # workhorse for how to transform existing columns, mutate columns across whatever columns are a character class and covert to lowercase, across or ends_with or starts_with are helper functions
+  mutate(nmfs_name = str_sub(nmfs_name, end = - 4)) %>% # string sub extracts or replaces substrings from a character vector, put in the same column (replace) 
+  filter(confidentiality == "public")
+```
+
+Make a customized graph:
+
+
+```{r}
+fish_plot <- ggplot(data = fish_noaa, aes(x=year, y=pounds)) +
+  geom_line(aes(color = nmfs_name), show.legend = FALSE) +
+  theme_minimal()
+fish_plot
+
+ggplotly(fish_plot) # to create an interactive graph
+# lots of overlapping lines is spaghetti plot
+
 
 ```
 
+```{r}
+#### Use gghighlight to highlight certain series
 
+ggplot(data = fish_noaa, aes(x=year, y=pounds, group = nmfs_name)) +
+  geom_line() +
+  theme_minimal() +
+  gghighlight(nmfs_name == "tunas") # to highlight tunas by itself (in black)
+```
 
+```{r}
+#### Use gghighlight to highlight certain series with specific value
 
+ggplot(data = fish_noaa, aes(x=year, y=pounds, group = nmfs_name)) +
+  geom_line(aes(color = nmfs_name)) + # assumes only want to apply color scheme to the series that highlight the gghighlight specifications, still grays out the other series
+  theme_minimal() +
+  gghighlight(max(pounds) > 1e8) # highlight where maximum value exceeds 10^8
+```
 
+#### Read in data from URL, 'lubridate()', 'mutate()', make a graph with months in logical order
 
+```{r}
 
+```
 
 
 
