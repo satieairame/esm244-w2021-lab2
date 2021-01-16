@@ -100,9 +100,45 @@ ggplot(data = fish_noaa, aes(x=year, y=pounds, group = nmfs_name)) +
 #### Read in data from URL, 'lubridate()', 'mutate()', make a graph with months in logical order
 
 ```{r}
-
+monroe_wt <- read_csv("https://data.bloomington.in.gov/dataset/2c81cfe3-62c2-46ed-8fcf-83c1880301d1/resource/13c8f7aa-af51-4008-80a9-56415c7c931e/download/mwtp_dailyelectricity_bclear.csv") %>% 
+  clean_names() 
 ```
 
+```{r}
+monroe_ts <- monroe_wt %>% 
+  mutate(date = mdy(date)) %>% # change date column to YYYY-MM-DD
+  mutate(record_month = month(date)) %>% # use month function to full month from existing date
+  mutate(month_name = month.abb[record_month]) %>% # month.abb to return the abbreviation for each month from record_month
+  mutate(month_name = fct_reorder(month_name, record_month)) # change or transform class of a variable, use a lot, for forcats part of tidyverse, use factor reorder to convert character to a factor and set the order based on values in another variable.
+
+# In Console:
+# class(monroe_ts$month_name) to check if character or factor or ?
+# unique(monroe_ts$month_name) to displah the different names
+# levels(monroe_ts$month_name) to show the order of characters based on the variable we used to order the data
+
+ggplot(data = monroe_ts, aes(month_name, y = total_k_wh))+
+  geom_jitter() # need to convert month_name to factor, and need to set factor to match number of the months, once you use fct_reorder, then the months appear in order
+```
+### Part 3: Compound Figures with "patchwork"
+
+```{r}
+graph_a <- ggplot(data = penguins, aes(x = body_mass_g, y = flipper_length_mm)) +
+  geom_point()
+graph_a
+
+graph_b <- ggplot(data = penguins, aes(x = species, y = flipper_length_mm)) +
+  geom_jitter(aes(color = species), show.legend = FALSE)
+graph_b
+
+# patchwork puts together graphs in a single figure, built to create customizable compound figures, look at patchwork documentation
+# Use | to put graphs side by side
+# Use / to put graphs one over the other
+
+graph_c <- (graph_a | graph_b) / fish_plot & theme_minimal()
+graph_c
+
+ggsave(here("fig", "graph_c_sa.png"), width = 5, height = 6) # can specify where to save the graph, specify height and width in inches, etc. check out documentation on ggsave
+```
 
 
 
